@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkySlot AI — Intelligent ATC Slot Allocation System</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="scan-line"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">✈ SKY<span>SLOT</span> AI</div>
+  <div class="nav-links">
+    <a class="active">Dashboard</a>
+    <a>Runway Mgmt</a>
+    <a>Flight Plan</a>
+    <a>Analytics</a>
+    <a>Settings</a>
+  </div>
+  <div class="nav-status">
+    <div class="status-dot" id="statusDot"></div>
+    <span style="color:#4a7a9b" id="airportName">MUMBAI CSIA · ICAO: VABB</span>
+    <span style="color:#e8f4ff;font-weight:600" id="clock">--:--:--</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-text">
+    <h1>Intelligent <em>ATC Slot</em><br>Allocation System</h1>
+    <p>AI-driven real-time runway slot management using conflict prediction, weather integration, and dynamic priority scoring for optimal airspace throughput.</p>
+    <div class="hero-stats">
+      <div class="stat-badge"><span class="val" id="activeFlights">0</span><span class="lbl">Active Flights</span></div>
+      <div class="stat-badge"><span class="val" id="slotsAlloc">0</span><span class="lbl">Slots Allocated</span></div>
+      <div class="stat-badge"><span class="val" id="aiAccuracy" style="color:var(--accent-green)">--%</span><span class="lbl">AI Accuracy</span></div>
+      <div class="stat-badge"><span class="val" id="conflictsCount" style="color:var(--accent-amber)">0</span><span class="lbl">Conflicts Detected</span></div>
+    </div>
+  </div>
+
+  <div class="radar-wrap">
+    <div class="radar">
+      <div class="radar-ring"></div>
+      <div class="radar-ring"></div>
+      <div class="radar-ring"></div>
+      <div class="radar-crosshair"></div>
+      <div class="radar-sweep"></div>
+      <div class="blip"></div>
+      <div class="blip"></div>
+      <div class="blip"></div>
+      <div class="blip"></div>
+      <div class="blip"></div>
+      <span class="radar-label tl">N 19.1°</span>
+      <span class="radar-label tr">E 072.8°</span>
+      <span class="radar-label bl">30 NM</span>
+      <span class="radar-label br">ALT: FL350</span>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD -->
+<div class="section-title"><h2>Live Operations Dashboard</h2></div>
+
+<div class="dashboard">
+
+  <!-- LEFT: FLIGHT QUEUE -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Flight Queue</span>
+      <span class="panel-badge badge-green" id="connStatus">LIVE</span>
+    </div>
+    <div class="flight-list" id="flightList">
+      <div style="padding:1rem;color:var(--text-dim);font-size:0.8rem;">Loading flights...</div>
+    </div>
+  </div>
+
+  <!-- CENTER: RUNWAY TIMELINE + AI -->
+  <div style="display:flex;flex-direction:column;gap:1.2rem;">
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Runway Timeline</span>
+        <div style="display:flex;gap:0.6rem;" id="runwayBadges">
+          <span class="panel-badge badge-cyan">Loading...</span>
+        </div>
+      </div>
+      <div class="timeline-wrap" id="timelineWrap">
+        <div style="padding:1rem;color:var(--text-dim);font-size:0.8rem;">Loading timeline...</div>
+      </div>
+    </div>
+
+    <!-- AI INSIGHTS -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">AI Conflict Resolution</span>
+        <span class="panel-badge badge-amber" id="insightBadge">0 ALERTS</span>
+      </div>
+      <div class="ai-section" id="aiInsights">
+        <div style="padding:0.5rem;color:var(--text-dim);font-size:0.8rem;">No insights available.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: METRICS -->
+  <div style="display:flex;flex-direction:column;gap:1.2rem;">
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">System Metrics</span>
+        <span class="panel-badge badge-green">OPTIMAL</span>
+      </div>
+      <div class="metrics-list">
+        <div class="metric-row">
+          <span class="metric-name">Runway Utilization</span>
+          <span class="metric-val" id="metricRunwayUtil" style="color:var(--accent-cyan)">--%</span>
+        </div>
+        <div class="metric-bar-wrap">
+          <div class="metric-bar-track"><div class="metric-bar-fill fill-cyan" id="barRunwayUtil" style="width:0%"></div></div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-name">On-Time Performance</span>
+          <span class="metric-val" id="metricOnTime" style="color:var(--accent-green)">--%</span>
+        </div>
+        <div class="metric-bar-wrap">
+          <div class="metric-bar-track"><div class="metric-bar-fill fill-green" id="barOnTime" style="width:0%"></div></div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-name">Avg Taxi Time</span>
+          <span class="metric-val" id="metricTaxi" style="color:var(--accent-amber)">-- min</span>
+        </div>
+        <div class="metric-bar-wrap">
+          <div class="metric-bar-track"><div class="metric-bar-fill fill-amber" id="barTaxi" style="width:0%"></div></div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-name">Conflicts (24h)</span>
+          <span class="metric-val" id="metricConflicts" style="color:var(--accent-red)">0</span>
+        </div>
+        <div class="metric-bar-wrap">
+          <div class="metric-bar-track"><div class="metric-bar-fill fill-red" id="barConflicts" style="width:0%"></div></div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-name">AI Response Time</span>
+          <span class="metric-val" id="metricResponse" style="color:var(--accent-green)">0.3s</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-name">Flights/Hour</span>
+          <span class="metric-val" id="metricFlightsHour" style="color:var(--accent-cyan)">--</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-name">Queue Depth</span>
+          <span class="metric-val" id="metricQueueDepth">-- flights</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Weather · METAR</span>
+        <span class="panel-badge badge-amber" id="wxBadge">CAVOK</span>
+      </div>
+      <div style="padding:0.8rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;line-height:2;color:var(--text-dim);" id="wxData">
+        Loading weather data...
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SLOT REQUEST -->
+<div class="section-title"><h2>Request New Slot Allocation</h2></div>
+<div class="slot-request">
+  <div class="request-grid" style="grid-template-columns: repeat(5, 1fr) auto;">
+    <div class="form-group">
+      <label>Flight ID</label>
+      <input type="text" placeholder="e.g. AI606" id="fid">
+    </div>
+    <div class="form-group">
+      <label>Aircraft Type</label>
+      <select id="actype">
+        <option>B737</option>
+        <option>A320</option>
+        <option>B777</option>
+        <option>A380</option>
+        <option>ATR72</option>
+        <option>B787</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Operation</label>
+      <select id="optype">
+        <option value="departure">Departure</option>
+        <option value="arrival">Arrival</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Priority</label>
+      <select id="priority">
+        <option value="3">Low (3)</option>
+        <option value="5" selected>Normal (5)</option>
+        <option value="7">High (7)</option>
+        <option value="10">Emergency (10)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Fuel %</label>
+      <input type="number" id="fuel" value="60" min="1" max="100">
+    </div>
+    <button class="btn-allocate" onclick="allocateSlot()">⚡ Allocate Slot</button>
+  </div>
+  
+  <div class="allocation-result" id="allocationResult">
+    <div class="allocation-result__header">✓ AI SLOT CONFIRMED</div>
+    <div class="allocation-result-grid" id="allocationResultBody"></div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-wrap" id="toasts"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
